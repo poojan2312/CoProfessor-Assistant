@@ -1,0 +1,87 @@
+[7:15 pm, 25/8/2026] Poojan: Sir, the main task was to segregate the proposed comments into different phases/ parts, and finalize the part that we want to work on mainly.
+
+We are working on that, alongside exploring the tech stacks and feasibility.
+
+And for the meeting, there are some placement procedures going on currently, so we are occupied in them.
+
+Sir, will let you know a day when everyone is available soon.
+
+Will keep updating here till then.
+[8:19 pm, 25/8/2026] Kapil Faculty MNNIT Project: Expecting regular  updates
+[7:13 pm, 8/9/2026] Poojan: Hello sir, sorry for the delayed update 
+
+Can we meet tomorrow at 10AM?
+To discuss about the project phases and finalize the phase we can work on.
+[7:14 pm, 8/9/2026] Kapil Faculty MNNIT Project: Share it here
+[7:19 pm, 8/9/2026] Kapil Faculty MNNIT Project: How you can confirm that references are genuine?
+[7:22 pm, 8/9/2026] Poojan: How you can confirm that references are genuine?
+References will be mainly from the material/ books that the professor will upload
+
+As in a particular chapter number or sections of a particular chapter
+
+So those will be genuine
+
+And apart from that, if more references are needed then the assistant can search and provide a list, which the professor can then verify/ confirm from.
+[7:23 pm, 8/9/2026] Kapil Faculty MNNIT Project: Is there any possibility of cross checking the content
+1. Is it backed by sources told by prof
+2. Is the reference provided can be accessed
+3. If accessible, can we verify the statements of the content generated
+[7:24 pm, 8/9/2026] Kapil Faculty MNNIT Project: Similarly if the content taken or backed from source of repute
+
+[7:29 pm, 8/9/2026] Kapil Faculty MNNIT Project: There is one way
+We can ask prof to select sources
+[7:29 pm, 8/9/2026] Kapil Faculty MNNIT Project: From the sources we found to be good
+[7:29 pm, 8/9/2026] Kapil Faculty MNNIT Project: We can brief the specifics of the sources
+[7:30 pm, 8/9/2026] Kapil Faculty MNNIT Project: Say at most n sources to work in one course delivery
+[7:35 pm, 8/9/2026] Kapil Faculty MNNIT Project: A mix of
+1. Tools
+2. Real world connections
+3. Interesting readings etc 
+4. Popular references on the subject
+can be included. We can ask prof to tag what sources can be used for what
+1. To build teasers,
+2. assignments,
+3. project ideas, 
+4. Lecture content
+5. Question paper
+6. Quiz
+7. Debate or discussion
+[7:38 pm, 8/9/2026] Poojan: Yes that can be done.
+
+Before the content generation, it will ask the prof to upload the resources/ readings they have, and the course description, outcomes…
+
+Then it can find sources on its own that are aligned to the course brief.
+
+And then ask the professor to finalize the sources for each stage, teasers assignments and so on..
+
+And every generated content will have the cited resource, so it can be cross verified later if needed.
+[7:40 pm, 8/9/2026] Kapil Faculty MNNIT Project: I have a general issue that the content generated in gemini is not correctly referenced
+
+[7:40 pm, 8/9/2026] Kapil Faculty MNNIT Project: Sections and playlist lec video is wrong
+[7:41 pm, 8/9/2026] Kapil Faculty MNNIT Project: Page numbers etc
+[7:42 pm, 8/9/2026] Kapil Faculty MNNIT Project: Sometimes the wrong material is referenced with valid but wrong reference
+[7:44 pm, 8/9/2026] Poojan: I can think of two main ways for now to tackle it:
+1. Another layer/ agent whose only work is cross verify the content against its citations. But this will also again be a gemini thing, so the issue may persist however chances are less
+2. ⁠After the cross verification with Gemini, the generated content will be presented to the prof for cross verification (This will increase the work from proff’s side but if we want 100% accuracy, the best way is to have a human at the final stage for verification)
+
+Will search for other ways for cross verification.
+[8:10 pm, 8/9/2026] Kapil Faculty MNNIT Project: Look for alternatives
+[8:10 pm, 8/9/2026] Kapil Faculty MNNIT Project: Accurate referencing
+[8:11 pm, 8/9/2026] Kapil Faculty MNNIT Project: Confine to limited sources
+[8:12 pm, 8/9/2026] Kapil Faculty MNNIT Project: Reduce complexity
+Increase trust
+[8:31 pm, 8/9/2026] Kapil Faculty MNNIT Project: Have we read about shiksha copilot?
+
+[7:52 am, 10/9/2026] Kapil Faculty MNNIT Project: meeting minutes @Poojan from the last meeting
+[7:55 am, 10/9/2026] Kapil Faculty MNNIT Project: Prepare a document and share it with me ASAP: 
+1. What exactly will we do in this phase?
+2. Strict Timeline
+3. Outcomes
+4. Tests that verify the outcomes and the systems we will build
+[9:44 am, 10/9/2026] Poojan: meeting minutes @Poojan from the last meeting
+In the last meeting, the topics discussed were:
+1. The resources cited by the assistant should be valid, and verifiable. It should not make up/ assume/ cite any non-existent resources or materials.
+2. It can have a re-calibration feature, which can re-calibrate the schedule of a lecture/ course any time the professor wants, in-case of some missed lectures, holidays etc...
+3. Discussions on the final deliverable was done, which will be a website with a chat-interface similar to ChatGPT/ Gemini, allowing professors to chat and adapt easily. It will also have some other project specific features.
+4. The interface will be more of a two-sided interaction, where the system will also ask/ remind the prof about some missing resources/ data for clarity.
+
