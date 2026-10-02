@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from app.models import ChatMessage, Course, Lecture
 from app.prompts import chat as prompt_mod
 from app.schemas import CourseUpdate, LectureCreate, LectureUpdate, PlanEdit
-from app.services import grounding, lecture_ops, plan_edits, planner, teaching_support
+from app.services import grounding, lecture_ops, plan_edits, planner, teaching_support, resource_verification
 
 log = logging.getLogger(__name__)
 
@@ -160,6 +160,16 @@ def _execute(
         teaching_support.generate(db, lecture)
         changed.add("support")
         return "Generated teaching support for this lecture.", lecture, changed
+
+    if action == "recommend_resources":
+        resources = args.get("resources") or []
+        if not resources:
+            raise ActionRefused("no resources were provided to recommend")
+        added = resource_verification.verify_and_add_resources(db, course, resources)
+        if not added:
+            raise ActionRefused("none of the recommended resources could be verified (they might be broken links or invalid identifiers)")
+        changed.add("course")
+        return f"Added verified external resources: {', '.join(added)}.", lecture, changed
 
     if action == "edit_segments":
         segments = args.get("segments") or []

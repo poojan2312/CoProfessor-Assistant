@@ -20,6 +20,7 @@ ACTIONS = [
     "drop_segments",
     "update_course",
     "generate_teaching_support",
+    "recommend_resources",
 ]
 
 RESPONSE_SCHEMA: dict = {
@@ -63,6 +64,19 @@ RESPONSE_SCHEMA: dict = {
                     },
                 },
                 "drop_ordinals": {"type": "array", "items": {"type": "integer"}},
+                "resources": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "kind": {"type": "string", "enum": ["book", "paper", "video", "web"]},
+                            "identifier": {"type": "string", "description": "ISBN for books, DOI for papers, URL for web, YouTube URL/ID for videos"},
+                            "title": {"type": "string"},
+                            "authors": {"type": "string"}
+                        },
+                        "required": ["kind", "identifier", "title"]
+                    }
+                }
             },
         },
         "clarification": {
@@ -101,6 +115,7 @@ DOING THINGS.
      - drop_segments: drop_ordinals [n]
      - update_course: title, code, objectives, student_level, lecture_duration_min
      - generate_teaching_support: no args - examples, activities, explanations
+     - recommend_resources: resources [{kind, identifier, title, authors?}] - suggest external resources. Never use for local uploads.
 7. Use "none" for questions, discussion and drafting. Most turns are "none".
 8. Segment numbers are the ordinals shown in the plan you were given. Never guess
    an ordinal that is not in it.
