@@ -55,6 +55,8 @@ export const api = {
     request<Source>(`/courses/${courseId}/materials`, { method: 'POST', body: form }),
   deleteMaterial: (sourceId: number) =>
     request<void>(`/materials/${sourceId}`, { method: 'DELETE' }),
+  approveMaterial: (sourceId: number) => request<Source>(`/materials/${sourceId}/approve`, { method: 'PATCH' }),
+  rejectMaterial: (sourceId: number) => request<Source>(`/materials/${sourceId}/reject`, { method: 'PATCH' }),
 
   listLectures: (courseId: number) => request<Lecture[]>(`/courses/${courseId}/lectures`),
   createLecture: (courseId: number, body: Record<string, unknown>) =>

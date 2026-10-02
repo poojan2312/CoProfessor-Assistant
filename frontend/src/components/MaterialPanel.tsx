@@ -133,9 +133,10 @@ export function MaterialPanel({
         {sources.length === 0 && (
           <li className="text-xs text-neutral-400">No material uploaded yet.</li>
         )}
-        {sources.map((source) => {
-          const doc = source.documents[0]
-          const status = doc?.ingest_status ?? 'pending'
+        {sources.filter(s => s.status !== 'rejected').map((source) => {
+          const doc = source.documents?.[0]
+          const isSuggested = source.kind !== 'uploaded'
+          const status = isSuggested ? source.status : (doc?.ingest_status ?? 'pending')
           return (
             <li
               key={source.id}
@@ -144,26 +145,43 @@ export function MaterialPanel({
               <div className="min-w-0">
                 <p className="truncate text-xs font-medium">{source.title}</p>
                 <p className="mt-0.5 text-[11px] text-neutral-500">
-                  {doc?.filename}
-                  {status === 'ready' && ` — ${doc.page_count} pages, ${doc.chunk_count} passages`}
+                  {isSuggested ? (
+                    <a href={source.identifier.startsWith('http') ? source.identifier : `https://doi.org/${source.identifier}`} target="_blank" rel="noreferrer" className="hover:underline">
+                      {source.kind.toUpperCase()} - {source.authors || 'Unknown author'}
+                    </a>
+                  ) : (
+                    <>
+                      {doc?.filename}
+                      {status === 'ready' && ` — ${doc?.page_count} pages, ${doc?.chunk_count} passages`}
+                    </>
+                  )}
                 </p>
                 {status === 'failed' && (
-                  <p className="mt-1 text-[11px] text-red-600">{doc.ingest_error}</p>
+                  <p className="mt-1 text-[11px] text-red-600">{doc?.ingest_error}</p>
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <span
-                  className={`rounded px-1.5 py-0.5 text-[10px] ${STATUS_STYLES[status] ?? ''}`}
-                >
-                  {status === 'ready' ? 'indexed' : status}
-                </span>
-                <button
-                  onClick={() => void remove(source.id)}
-                  className="text-[11px] text-neutral-400 hover:text-red-600"
-                  aria-label={`Remove ${source.title}`}
-                >
-                  ✕
-                </button>
+                {isSuggested && status === 'pending' ? (
+                  <>
+                    <button onClick={async () => { await api.approveMaterial(source.id); void refresh(); }} className="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded hover:bg-emerald-100">Approve</button>
+                    <button onClick={async () => { await api.rejectMaterial(source.id); void refresh(); }} className="text-[10px] px-2 py-0.5 bg-red-50 text-red-700 rounded hover:bg-red-100">Reject</button>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className={`rounded px-1.5 py-0.5 text-[10px] ${STATUS_STYLES[status] ?? ''}`}
+                    >
+                      {status === 'ready' ? 'indexed' : status}
+                    </span>
+                    <button
+                      onClick={() => void remove(source.id)}
+                      className="text-[11px] text-neutral-400 hover:text-red-600"
+                      aria-label={`Remove ${source.title}`}
+                    >
+                      ✕
+                    </button>
+                  </>
+                )}
               </div>
             </li>
           )

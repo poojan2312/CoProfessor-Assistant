@@ -139,3 +139,23 @@ def delete_material(source_id: int, db: Session = Depends(get_db)):
         store.delete_document(document.id)
     db.delete(source)
     db.commit()
+
+@router.patch("/materials/{source_id}/approve", response_model=SourceOut)
+def approve_material(source_id: int, db: Session = Depends(get_db)) -> Source:
+    source = db.get(Source, source_id)
+    if source is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Source {source_id} not found")
+    source.status = "approved"
+    db.commit()
+    db.refresh(source)
+    return source
+
+@router.patch("/materials/{source_id}/reject", response_model=SourceOut)
+def reject_material(source_id: int, db: Session = Depends(get_db)) -> Source:
+    source = db.get(Source, source_id)
+    if source is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Source {source_id} not found")
+    source.status = "rejected"
+    db.commit()
+    db.refresh(source)
+    return source
