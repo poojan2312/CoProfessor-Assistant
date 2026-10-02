@@ -28,7 +28,7 @@ def verify_and_add_resources(db: Session, course: Course, resources: list[dict])
                 # Identifier should be ISBN
                 isbn = ''.join(filter(str.isdigit, identifier))
                 if isbn:
-                    resp = httpx.get(f"https://openlibrary.org/isbn/{isbn}.json", timeout=5.0)
+                    resp = httpx.get(f"https://openlibrary.org/isbn/{isbn}.json", timeout=10.0)
                     if resp.status_code == 200:
                         is_valid = True
                         data = resp.json()
@@ -38,6 +38,22 @@ def verify_and_add_resources(db: Session, course: Course, resources: list[dict])
                                 year = int(data["publish_date"][-4:])
                             except ValueError:
                                 pass
+                
+                if not is_valid and title:
+                    search_url = f"https://openlibrary.org/search.json?q={urllib.parse.quote(title)}&limit=1"
+                    resp = httpx.get(search_url, timeout=10.0)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        if data.get("docs"):
+                            doc = data["docs"][0]
+                            is_valid = True
+                            title = doc.get("title", title)
+                            if doc.get("author_name"):
+                                authors = ", ".join(doc["author_name"])
+                            if doc.get("first_publish_year"):
+                                year = doc["first_publish_year"]
+                            if doc.get("isbn"):
+                                identifier = doc["isbn"][0]
             elif kind == "paper":
                 # Verify via Crossref DOI
                 doi = identifier.replace("https://doi.org/", "")
@@ -51,12 +67,16 @@ def verify_and_add_resources(db: Session, course: Course, resources: list[dict])
                 url = identifier
                 if "youtube.com" not in url and "youtu.be" not in url:
                     url = f"https://www.youtube.com/watch?v={identifier}"
-                resp = httpx.get(f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json", timeout=5.0)
+                resp = httpx.get(f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json", timeout=10.0)
                 if resp.status_code == 200:
                     is_valid = True
                     data = resp.json()
                     title = data.get("title", title)
                     authors = data.get("author_name", authors)
+                else:
+                    resp = httpx.get(url, timeout=10.0, follow_redirects=True)
+                    if resp.status_code == 200:
+                        is_valid = True
             elif kind == "web":
                 # Just a basic HEAD request to check if the URL exists
                 resp = httpx.head(identifier, timeout=5.0, follow_redirects=True)
