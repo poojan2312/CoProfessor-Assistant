@@ -12,9 +12,11 @@ const STATUS_STYLES: Record<string, string> = {
 
 export function MaterialPanel({
   courseId,
+  refreshTrigger,
   onReadyCountChange,
 }: {
   courseId: number
+  refreshTrigger?: number
   onReadyCountChange?: (count: number) => void
 }) {
   const [sources, setSources] = useState<Source[]>([])
@@ -36,7 +38,7 @@ export function MaterialPanel({
 
   useEffect(() => {
     void refresh()
-  }, [refresh])
+  }, [refresh, refreshTrigger])
 
   // Ingestion runs in the background, so poll while anything is still working.
   const stillWorking = sources.some((s) =>

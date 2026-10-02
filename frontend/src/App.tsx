@@ -24,6 +24,7 @@ export default function App() {
   const [plan, setPlan] = useState<Plan | null>(null)
   const [tab, setTab] = useState<Tab>('plan')
   const [supportKey, setSupportKey] = useState(0)
+  const [materialRefresh, setMaterialRefresh] = useState(0)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -70,7 +71,10 @@ export default function App() {
     if (turn.focus_lecture_id && turn.focus_lecture_id !== lectureId) {
       setLectureId(turn.focus_lecture_id)
     }
-    if (turn.course_changed) setCourses(await api.listCourses())
+    if (turn.course_changed) {
+      setCourses(await api.listCourses())
+      setMaterialRefresh((n) => n + 1)
+    }
     if (turn.lecture_changed && courseId !== null) await loadLectures(courseId)
     if (turn.plan_changed) {
       const target = turn.focus_lecture_id ?? lectureId
@@ -221,7 +225,7 @@ export default function App() {
           </details>
         </section>
 
-        {courseId !== null && <MaterialPanel courseId={courseId} />}
+        {courseId !== null && <MaterialPanel courseId={courseId} refreshTrigger={materialRefresh} />}
       </aside>
 
       {course === null ? (
