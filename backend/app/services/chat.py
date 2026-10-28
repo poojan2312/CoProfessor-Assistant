@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from datetime import date
 
 from pydantic import ValidationError
 from sqlalchemy import select
@@ -19,8 +20,9 @@ from sqlalchemy.orm import Session
 
 from app.models import ChatMessage, Course, Lecture
 from app.prompts import chat as prompt_mod
-from app.schemas import CourseUpdate, LectureCreate, LectureUpdate, PlanEdit
+from app.schemas import CourseUpdate, LectureCreate, LectureUpdate, PlanEdit, RecalibrateRequest
 from app.services import grounding, lecture_ops, plan_edits, planner, teaching_support, resource_verification
+from app.services import schedule
 
 log = logging.getLogger(__name__)
 
@@ -58,7 +60,29 @@ def _lecture_lines(db: Session, course_id: int) -> list[str]:
     rows = db.execute(
         select(Lecture).where(Lecture.course_id == course_id).order_by(Lecture.seq_no)
     ).scalars()
-    return [f"{l.seq_no}. {l.topic} ({l.duration_min} min)" for l in rows]
+    return [
+        f"{l.seq_no}. {l.topic} ({l.duration_min} min, "
+        f"{l.scheduled_date.isoformat() if l.scheduled_date else 'no date'}, {l.status})"
+        for l in rows
+    ]
+
+
+def _schedule_lines(course: Course) -> list[str]:
+    """The teaching calendar, so the model can resolve "tomorrow" or "next Monday"."""
+    today = date.today()
+    days = ", ".join(schedule.WEEKDAYS[d] for d in sorted(course.meeting_days or []))
+    lines = [
+        f"Today: {today.isoformat()} ({schedule.WEEKDAYS[today.weekday()]})",
+        f"Class days: {days or 'NOT SET'}",
+        f"Term: {course.start_date or 'start NOT SET'} to {course.end_date or 'no end date'}",
+    ]
+    blocked = course.blocked_dates or []
+    if blocked:
+        lines.append(
+            "No-class dates: "
+            + ", ".join(f"{b.get('date')} ({b.get('reason', '')})" for b in blocked[-15:])
+        )
+    return lines
 
 
 # --- Argument hygiene ---------------------------------------------------------
@@ -125,6 +149,22 @@ def _execute(
             created,
             changed,
         )
+    if action == "recalibrate_schedule":
+        fields = _subset(
+            args, ("from_date", "blocked_dates", "missed_seq_nos", "new_duration_min")
+        )
+        apply_now = bool(args.get("apply"))
+        request = _validate(RecalibrateRequest, {**fields, "apply": apply_now})
+        try:
+            proposal = schedule.propose(
+                course, schedule.lectures_of(db, course.id), request, today=date.today()
+            )
+        except schedule.ScheduleError as exc:
+            raise ActionRefused(str(exc).rstrip(".")) from exc
+        if apply_now:
+            schedule.apply(db, course, proposal)
+            changed.update({"course", "lecture", "plan"})
+        return schedule.summarize(proposal, applied=apply_now), lecture, changed
 
     # Everything below needs a lecture in focus.
     if lecture is None:
@@ -238,6 +278,7 @@ def send(
         course_code=course.code,
         objectives=course.objectives,
         student_level=course.student_level,
+        schedule=_schedule_lines(course),
         lectures=_lecture_lines(db, course.id),
         focus_lecture=(
             f"Lecture {lecture.seq_no}: {lecture.topic} ({lecture.duration_min} min)"

@@ -7,6 +7,7 @@ import { MaterialPanel } from './components/MaterialPanel'
 import { PlanView } from './components/PlanView'
 import { TeachingSupportPanel } from './components/TeachingSupportPanel'
 import type { ChatTurn, Course, Lecture, Plan } from './types'
+import { SchedulePanel } from './components/SchedulePanel'
 
 type Tab = 'plan' | 'support' | 'details'
 
@@ -267,6 +268,12 @@ export default function App() {
                   >
                     {l.seq_no}. {l.topic}
                     <span className="ml-1 opacity-60">{l.duration_min}m</span>
+                    {l.scheduled_date && (
+                      <span className="ml-1 opacity-60">· {l.scheduled_date.slice(5)}</span>
+                    )}
+                    {l.status !== 'planned' && (
+                      <span className="ml-1 opacity-60">({l.status})</span>
+                    )}
                     {l.has_plan && <span className="ml-1">•</span>}
                   </button>
                 ))}
@@ -307,7 +314,15 @@ export default function App() {
                 </button>
               </form>
             </section>
-
+              <SchedulePanel
+              course={course}
+              lectures={lectures}
+              onChanged={async () => {
+                setCourses(await api.listCourses())
+                if (courseId !== null) await loadLectures(courseId)
+                if (lectureId !== null) await loadPlan(lectureId)
+              }}
+            />
             {lecture && (
               <>
                 <nav className="flex gap-1 border-b border-rule">

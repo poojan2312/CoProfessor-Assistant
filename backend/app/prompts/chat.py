@@ -21,6 +21,7 @@ ACTIONS = [
     "update_course",
     "generate_teaching_support",
     "recommend_resources",
+    "recalibrate_schedule",
 ]
 
 RESPONSE_SCHEMA: dict = {
@@ -64,6 +65,21 @@ RESPONSE_SCHEMA: dict = {
                     },
                 },
                 "drop_ordinals": {"type": "array", "items": {"type": "integer"}},
+                "from_date": {"type": "string", "description": "YYYY-MM-DD"},
+                "blocked_dates": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "date": {"type": "string", "description": "YYYY-MM-DD"},
+                            "reason": {"type": "string"},
+                        },
+                        "required": ["date"],
+                    },
+                },
+                "missed_seq_nos": {"type": "array", "items": {"type": "integer"}},
+                "new_duration_min": {"type": "integer"},
+                "apply": {"type": "boolean"},
                 "resources": {
                     "type": "array",
                     "items": {
@@ -116,6 +132,11 @@ DOING THINGS.
      - update_course: title, code, objectives, student_level, lecture_duration_min
      - generate_teaching_support: no args - examples, activities, explanations
      - recommend_resources: resources [{kind, identifier, title, authors?}] - suggest external resources. Never use for local uploads.
+     - recalibrate_schedule: blocked_dates [{date, reason}] for holidays or
+       cancelled classes, missed_seq_nos [n] for lectures that did not happen,
+       new_duration_min if the class length changes, from_date if the change
+       starts later than today, apply true/false. Dates are YYYY-MM-DD; work out
+       "tomorrow" or "next Monday" from Today in the teaching calendar.
 7. Use "none" for questions, discussion and drafting. Most turns are "none".
 8. Segment numbers are the ordinals shown in the plan you were given. Never guess
    an ordinal that is not in it.
@@ -131,6 +152,16 @@ ASKING BACK.
     topic too broad for the time given - put a single question in "clarification",
     set action to "none", and do not guess. Only ask when the answer would change
     what you do. Leave it empty otherwise.
+
+
+SCHEDULE CHANGES.
+
+12. For recalibrate_schedule, first send it with apply false: the system works
+    out the new schedule and shows it to the professor. In "reply", restate
+    exactly what you sent (dates, lecture numbers, class length) and ask whether
+    to apply it. Only after they confirm, send the same arguments with apply true.
+13. If the class days or the term start date are NOT SET, do not call it - ask
+    for them in "clarification".
 """
 
 
@@ -141,6 +172,7 @@ def build_prompt(
     objectives: str,
     student_level: str,
     lectures: list[str],
+    schedule: list[str] | None = None,
     focus_lecture: str | None,
     plan_outline: list[str],
     has_support: bool,
@@ -155,6 +187,10 @@ def build_prompt(
     if objectives:
         lines.append(f"Objectives: {objectives}")
     lines.append(f"Student level: {student_level or 'NOT SPECIFIED'}")
+    
+    if schedule:
+        lines += ["", "## Teaching calendar"]
+        lines += [f"  {line}" for line in schedule]
 
     lines += ["", "## Lectures in this course"]
     lines += [f"  {line}" for line in lectures] if lectures else ["  none yet"]

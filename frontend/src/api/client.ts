@@ -1,4 +1,5 @@
 import type {
+  RecalibrateResult,
   ChatMessage,
   ChatTurn,
   Citation,
@@ -8,6 +9,8 @@ import type {
   Source,
   TeachingSupport,
 } from '../types'
+
+
 
 const BASE = '/api'
 
@@ -50,6 +53,13 @@ export const api = {
     request<Course>('/courses', { method: 'POST', body: JSON.stringify(body) }),
   deleteCourse: (id: number) => request<void>(`/courses/${id}`, { method: 'DELETE' }),
 
+  updateCourse: (id: number, body: Record<string, unknown>) =>
+    request<Course>(`/courses/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  recalibrate: (courseId: number, body: Record<string, unknown>) =>
+    request<RecalibrateResult>(`/courses/${courseId}/recalibrate`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
   listMaterials: (courseId: number) => request<Source[]>(`/courses/${courseId}/materials`),
   uploadMaterial: (courseId: number, form: FormData) =>
     request<Source>(`/courses/${courseId}/materials`, { method: 'POST', body: form }),

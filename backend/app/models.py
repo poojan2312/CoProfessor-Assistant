@@ -51,6 +51,12 @@ class Course(Base):
     student_level: Mapped[str] = mapped_column(String(100), default="")
     total_lectures: Mapped[int | None] = mapped_column(Integer, nullable=True)
     lecture_duration_min: Mapped[int] = mapped_column(Integer, default=50)
+        # Week 5: the teaching calendar, used for schedule re-calibration.
+    start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    meeting_days: Mapped[list] = mapped_column(JSON, default=list)  # 0=Mon .. 6=Sun
+    # [{"date": "YYYY-MM-DD", "reason": "..."}] - holidays and missed classes
+    blocked_dates: Mapped[list] = mapped_column(JSON, default=list)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
@@ -144,7 +150,7 @@ class Chunk(Base):
 class Lecture(Base):
     __tablename__ = "lecture"
 
-    STATUSES = ("planned", "delivered", "cancelled")
+    STATUSES = ("planned", "delivered", "cancelled", "merged")
 
     id: Mapped[int] = mapped_column(primary_key=True)
     course_id: Mapped[int] = mapped_column(ForeignKey("course.id"), index=True)

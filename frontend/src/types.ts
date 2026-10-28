@@ -7,6 +7,10 @@ export interface Course {
   student_level: string
   total_lectures: number | null
   lecture_duration_min: number
+  start_date: string | null
+  end_date: string | null
+  meeting_days: number[]
+  blocked_dates: BlockedDate[]
   created_at: string
 }
 
@@ -18,6 +22,7 @@ export interface DocumentInfo {
   ingest_status: 'pending' | 'processing' | 'ready' | 'failed'
   ingest_error: string
   created_at: string
+
 }
 
 export interface Source {
@@ -189,4 +194,31 @@ export interface ChatTurn {
   lecture_changed: boolean
   course_changed: boolean
   support_changed: boolean
+}
+
+export interface BlockedDate {
+  date: string
+  reason: string
+}
+
+export interface ScheduleChange {
+  lecture_ids: number[]
+  seq_nos: number[]
+  topic: string
+  old_date: string | null
+  new_date: string | null
+  old_duration_min: number
+  new_duration_min: number
+  merged: boolean
+  changed: boolean
+}
+
+export interface RecalibrateResult {
+  applied: boolean
+  from_date: string
+  available_slots: number | null
+  changes: ScheduleChange[]
+  added_blocked_dates: BlockedDate[]
+  spare_dates: string[]
+  warnings: string[]
 }

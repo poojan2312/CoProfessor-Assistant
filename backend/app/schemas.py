@@ -1,9 +1,13 @@
 """Request and response models."""
 from __future__ import annotations
 
+import datetime as _dt
 from datetime import date, datetime
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+Weekday = Annotated[int, Field(ge=0, le=6)]  # 0=Mon .. 6=Sun
 
 
 class ORMModel(BaseModel):
@@ -11,6 +15,12 @@ class ORMModel(BaseModel):
 
 
 # --- Courses -----------------------------------------------------------------
+
+class BlockedDate(BaseModel):
+    """A date the course does not meet: a holiday, or a class that was missed."""
+
+    date: _dt.date
+    reason: str = Field(default="", max_length=200)
 
 class CourseCreate(BaseModel):
     title: str = Field(min_length=1, max_length=300)
@@ -20,6 +30,10 @@ class CourseCreate(BaseModel):
     student_level: str = ""
     total_lectures: int | None = Field(default=None, ge=1, le=200)
     lecture_duration_min: int = Field(default=50, ge=5, le=300)
+    start_date: date | None = None
+    end_date: date | None = None
+    meeting_days: list[Weekday] = []
+    blocked_dates: list[BlockedDate] = []
 
 
 class CourseUpdate(BaseModel):
@@ -30,6 +44,10 @@ class CourseUpdate(BaseModel):
     student_level: str | None = None
     total_lectures: int | None = Field(default=None, ge=1, le=200)
     lecture_duration_min: int | None = Field(default=None, ge=5, le=300)
+    start_date: date | None = None
+    end_date: date | None = None
+    meeting_days: list[Weekday] | None = None
+    blocked_dates: list[BlockedDate] | None = None
 
 
 class CourseOut(ORMModel):
@@ -41,9 +59,44 @@ class CourseOut(ORMModel):
     student_level: str
     total_lectures: int | None
     lecture_duration_min: int
+    start_date: date | None = None
+    end_date: date | None = None
+    meeting_days: list[int] = []
+    blocked_dates: list[BlockedDate] = []
     created_at: datetime
 
+# --- Schedule re-calibration (Week 5) ------------------------------------------
 
+class RecalibrateRequest(BaseModel):
+    """What changed. With apply=false (the default) nothing is written."""
+
+    from_date: date | None = None  # re-plan from this date; default today
+    blocked_dates: list[BlockedDate] = []  # new holidays / cancelled classes
+    missed_seq_nos: list[int] = []  # lectures that did not happen on their date
+    new_duration_min: int | None = Field(default=None, ge=5, le=300)
+    apply: bool = False
+
+
+class ScheduleChange(BaseModel):
+    lecture_ids: list[int]
+    seq_nos: list[int]
+    topic: str
+    old_date: date | None
+    new_date: date | None
+    old_duration_min: int
+    new_duration_min: int
+    merged: bool
+    changed: bool
+
+
+class RecalibrateOut(BaseModel):
+    applied: bool
+    from_date: date
+    available_slots: int | None
+    changes: list[ScheduleChange]
+    added_blocked_dates: list[BlockedDate]
+    spare_dates: list[date]
+    warnings: list[str]
 # --- Materials ---------------------------------------------------------------
 
 class DocumentOut(ORMModel):
@@ -86,7 +139,7 @@ class LectureUpdate(BaseModel):
     scheduled_date: date | None = None
     student_level_override: str | None = None
     notes: str | None = None
-    status: str | None = None
+    status: Literal["planned", "delivered", "cancelled"] | None = None
 
 
 class LectureOut(ORMModel):
