@@ -8,18 +8,6 @@ are missed, cancelled or shortened.
 
 Phase 1 covers course and lecture preparation support. Final-year B.Tech project, MNNIT.
 
-## The design commitment
-
-The project exists because of one recurring complaint from the supervising professor: generated
-content was not correctly referenced — wrong sections, wrong page numbers, wrong videos, and
-"valid but wrong" references. So the system is built on a single rule:
-
-> **The language model is never the source of a citation fact.**
-
-Page numbers, titles and authors come from the PDF parser and the database. The model sees
-passages labelled `[S1]…[Sk]` with no bibliographic detail and may only cite by tag, so it cannot
-write a wrong page number.
-
 | Step | What happens | Why it matters |
 |---|---|---|
 | Ingest | PyMuPDF records each passage with the PDF page it came from. Passages never span a page boundary. | `page_no` is exact, not approximate |
