@@ -4,20 +4,6 @@ An AI co-professor that helps a professor prepare a lecture: a chat interface, s
 plans, concept sequencing, time allocation, teaching support and likely misconceptions —
 all grounded in the professor's own uploaded material.
 
-## The design commitment
-
-The project exists because of one recurring complaint: *"the content generated in gemini is
-not correctly referenced — sections and playlist lec video is wrong, page numbers etc.
-Sometimes the wrong material is referenced with valid but wrong reference."*
-
-So this system is built on a single rule:
-
-> **The language model is never the source of a citation fact.**
-
-Page numbers, titles and authors come from the PDF parser and the database. The model may
-only point at a retrieved passage by opaque tag (`S1`, `S2`, …); it never sees or writes a
-page number, so it cannot get one wrong. Concretely:
-
 | Step | What happens | Why it matters |
 |---|---|---|
 | Ingest | PyMuPDF records each passage with the page it came from. Passages never span a page boundary. | `page_no` is exact, not approximate |
@@ -132,26 +118,7 @@ title can be checked rather than trusted.
 
 ## Known limits
 
-- **Free-tier quota: 5 requests per minute** for `gemini-3.8-flash`, with a daily ceiling.
-  Google signals this as either 429 or 503. The client backs off past the quota window and
-  surfaces a plain-language message; repeated regeneration during a demo will still hit it.
-  Enabling billing removes the limit.
 - **Scanned PDFs are rejected.** Text is extracted, not OCR'd; a scan reports a clear
   ingest error rather than indexing nothing.
 - Uploads are PDF only.
 
-## Status against the Phase 1 plan
-
-Weeks 2 and 3 are complete and verified end to end.
-
-**Week 2** — course and lecture context, material upload and retrieval, lecture-plan
-generation, concept sequencing, time allocation, and professor review/edit/regenerate.
-
-**Week 3** — teaching support (real-world and industry applications, classroom activities,
-interactive presentation suggestions, alternative explanations for difficult concepts), and
-the professor chat interface those capabilities are reachable through.
-
-The two-sided interaction of Week 4 also works already: the assistant raises missing
-information rather than assuming it, both when planning and mid-conversation. Resource
-verification against external catalogues (Week 4) and schedule re-calibration (Week 5) are
-not built yet.
